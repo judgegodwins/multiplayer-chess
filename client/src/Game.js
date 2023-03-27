@@ -116,9 +116,7 @@ function Game({ players, room, orientation, cleanup }) {
           </Box>
         )}
       </Stack>
-    
-      // Game Over CustomDialog
-      <CustomDialog
+      <CustomDialog // Game Over CustomDialog
         open={Boolean(over)}
         title={over}
         contentText={over}
