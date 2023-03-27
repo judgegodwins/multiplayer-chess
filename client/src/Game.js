@@ -15,7 +15,7 @@ import { Chess } from "chess.js";
 import CustomDialog from "./components/CustomDialog";
 import socket from "./socket";
 
-function Game({ players, username, room, orientation }) {
+function Game({ players, room, orientation, cleanup }) {
   const chess = useMemo(() => new Chess(), []); // <- 1
   const [fen, setFen] = useState(chess.fen()); // <- 2
   const [over, setOver] = useState("");
@@ -82,7 +82,23 @@ function Game({ players, username, room, orientation }) {
       makeAMove(move); //
     });
   }, [makeAMove]);
+
+  	
+  useEffect(() => {
+    socket.on('playerDisconnected', (player) => {
+      setOver(`${player.username} has disconnected`); // set game over
+    });
+  }, []);
   
+  useEffect(() => {
+    socket.on('closeRoom', ({ roomId }) => {
+      console.log('closeRoom', roomId, room)
+      if (roomId === room) {
+        cleanup();
+      }
+    });
+  }, [room, cleanup]);
+
   // Game component returned jsx
   return (
     <Stack>
@@ -116,14 +132,13 @@ function Game({ players, username, room, orientation }) {
           </Box>
         )}
       </Stack>
-    
-      // Game Over CustomDialog
-      <CustomDialog
+      <CustomDialog // Game Over CustomDialog
         open={Boolean(over)}
         title={over}
         contentText={over}
         handleContinue={() => {
-          setOver("");
+          socket.emit("closeRoom", { roomId: room });
+          cleanup();
         }}
       />
     </Stack>
