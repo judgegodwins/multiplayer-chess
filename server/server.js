@@ -97,6 +97,37 @@ io.on('connection', (socket) => {
     // emit to all sockets in the room except the emitting socket.
     socket.to(data.room).emit('move', data.move);
   });
+
+  socket.on("disconnect", () => {
+    const gameRooms = Array.from(rooms.values()); // <- 1
+
+    gameRooms.forEach((room) => { // <- 2
+      const userInRoom = room.players.find((player) => player.id === socket.id); // <- 3
+
+      if (userInRoom) {
+        if (room.players.length < 2) {
+          // if there's only 1 player in the room, close it and exit.
+          rooms.delete(room.roomId);
+          return;
+        }
+
+        socket.to(room.roomId).emit("playerDisconnected", userInRoom); // <- 4
+      }
+    });
+  });
+
+  socket.on("closeRoom", async (data) => {
+    socket.to(data.roomId).emit("closeRoom", data); // <- 1 inform others in the room that the room is closing
+
+    const clientSockets = await io.in(data.roomId).fetchSockets(); // <- 2 get all sockets in a room
+
+    // loop over each socket client
+    clientSockets.forEach((s) => {
+      s.leave(data.roomId); // <- 3 and make them leave the room on socket.io
+    });
+
+    rooms.delete(data.roomId); // <- 4 delete room from rooms map
+  });
 });
 
 server.listen(port, () => {
