@@ -15,7 +15,7 @@ import { Chess } from "chess.js";
 import CustomDialog from "./components/CustomDialog";
 import socket from "./socket";
 
-function Game({ players, username, room, orientation }) {
+function Game({ players, room, orientation, cleanup }) {
   const chess = useMemo(() => new Chess(), []); // <- 1
   const [fen, setFen] = useState(chess.fen()); // <- 2
   const [over, setOver] = useState("");
