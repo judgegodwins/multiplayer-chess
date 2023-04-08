@@ -53,9 +53,9 @@ function Game({ players, room, orientation, cleanup }) {
   // onDrop function
   function onDrop(sourceSquare, targetSquare) {
     // orientation is either 'white' or 'black'. game.turn() returns 'w' or 'b'
-    if (chess.turn() !== orientation[0]) return null; // <- 1 prohibit player from moving piece of other player
+    if (chess.turn() !== orientation[0]) return false; // <- 1 prohibit player from moving piece of other player
 
-    if (players.length < 2) return null; // <- 2 disallow a move if the opponent has not joined
+    if (players.length < 2) return false; // <- 2 disallow a move if the opponent has not joined
 
     const moveData = {
       from: sourceSquare,
